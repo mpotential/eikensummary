@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英検2級 要約対策アプリ</title>
+<style>
+  :root {
+    --navy: #1F3864;
+    --blue: #2E74B5;
+    --light-blue: #DEEAF1;
+    --accent: #E67E22;
+    --green: #27AE60;
+    --red: #E74C3C;
+    --gray: #7F8C8D;
+    --bg: #F4F6F9;
+    --white: #FFFFFF;
+    --border: #BDC3C7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI','Helvetica Neue',Arial,'Noto Sans JP',sans-serif; background: var(--bg); color: #2C3E50; min-height: 100vh; }
+  header { background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%); color: white; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: 0.05em; }
+  header span { font-size: 0.85rem; opacity: 0.8; }
+  .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+  .grade-nav { display: flex; gap: 10px; margin-bottom: 24px; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+  .grade-link { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px; background: white; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; color: var(--gray); transition: all 0.2s; display: block; }
+  .grade-link:hover { border-color: var(--blue); color: var(--blue); }
+  .grade-link.active { background: var(--blue); border-color: var(--blue); color: white; box-shadow: 0 3px 8px rgba(46,116,181,0.35); }
+  .grade-link .badge { display: block; font-size: 0.7rem; font-weight: 400; margin-top: 2px; opacity: 0.75; }
+  .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 20px; }
+  .card-title { font-size: 0.8rem; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .card-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background: var(--blue); border-radius: 2px; }
+  .info-row { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .info-chip { background: var(--light-blue); color: var(--navy); font-size: 0.8rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+  .info-chip.topic { background: #FEF9E7; color: #7D6608; }
+  #passage-text { font-size: 1rem; line-height: 1.85; color: #2C3E50; white-space: pre-line; }
+  textarea { width: 100%; min-height: 120px; padding: 14px; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; line-height: 1.7; resize: vertical; font-family: inherit; transition: border-color 0.2s; }
+  textarea:focus { outline: none; border-color: var(--blue); }
+  .word-bar { margin-top: 10px; }
+  .word-status { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .word-count { font-size: 0.95rem; font-weight: 600; }
+  .word-count.ok { color: var(--green); }
+  .word-count.low { color: var(--accent); }
+  .word-count.over { color: var(--red); }
+  .progress-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s, background 0.3s; background: var(--blue); }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-primary { background: var(--blue); color: white; flex: 1; min-width: 120px; }
+  .btn-primary:hover { background: var(--navy); }
+  .btn-primary:disabled { background: var(--border); cursor: not-allowed; }
+  .btn-secondary { background: var(--light-blue); color: var(--navy); }
+  .btn-secondary:hover { background: #c8dff0; }
+  #feedback-section { display: none; }
+  .score-board { background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%); border-radius: 12px; padding: 20px; color: white; text-align: center; margin-bottom: 20px; }
+  .total-score { font-size: 3rem; font-weight: 800; line-height: 1; }
+  .total-score span { font-size: 1.2rem; font-weight: 400; opacity: 0.8; }
+  .score-msg { font-size: 0.95rem; margin-top: 8px; opacity: 0.9; }
+  .score-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+  .score-item { background: white; border-radius: 10px; padding: 14px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--border); }
+  .score-item.great { border-color: var(--green); }
+  .score-item.good { border-color: var(--blue); }
+  .score-item.fair { border-color: var(--accent); }
+  .score-item.poor { border-color: var(--red); }
+  .score-label { font-size: 0.9rem; font-weight: 600; color: #2C3E50; }
+  .score-pts { font-size: 1.4rem; font-weight: 800; color: var(--navy); }
+  .score-pts span { font-size: 0.75rem; color: var(--gray); }
+  .feedback-list { list-style: none; }
+  .feedback-list li { padding: 10px 14px; border-bottom: 1px solid #EEF0F3; font-size: 0.9rem; line-height: 1.6; }
+  .feedback-list li:last-child { border-bottom: none; }
+  .model-answer-box { background: #F0FAF4; border: 2px solid #A9DFBF; border-radius: 10px; padding: 16px; }
+  .model-answer-box p { font-size: 1rem; line-height: 1.8; color: #1E8449; }
+  .model-word-badge { display: inline-block; background: var(--green); color: white; font-size: 0.8rem; font-weight: 600; padding: 2px 10px; border-radius: 20px; margin-top: 8px; }
+  .key-point { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #EEF0F3; font-size: 0.9rem; line-height: 1.6; }
+  .key-point:last-child { border-bottom: none; }
+  .key-point .icon { font-size: 1.1rem; flex-shrink: 0; }
+  .nav-counter { background: white; border-radius: 10px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 6px rgba(0,0,0,0.06); margin-bottom: 16px; }
+  .counter-text { font-size: 0.9rem; color: var(--gray); font-weight: 600; }
+  .counter-num { font-size: 1.1rem; font-weight: 800; color: var(--navy); }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎯 英検2級 要約対策アプリ</h1>
+  <span id="q-counter">問題 1 / 10</span>
+</header>
+<div class="container">
+  <nav class="grade-nav">
+    <a class="grade-link active" href="2kyu.html">2級<span class="badge">45〜55語</span></a>
+    <a class="grade-link" href="pre1kyu.html">準1級<span class="badge">60〜70語</span></a>
+    <a class="grade-link" href="1kyu.html">1級<span class="badge">90〜110語</span></a>
+  </nav>
+
+  <div class="card">
+    <div class="card-title">📄 英文パッセージ</div>
+    <div class="info-row">
+      <span class="info-chip topic" id="topic-chip">トピック</span>
+      <span class="info-chip" id="wordcount-chip">語数</span>
+      <span class="info-chip">要約目標：45〜55語</span>
+    </div>
+    <div id="passage-text"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✏️ あなたの要約</div>
+    <textarea id="answer-input" placeholder="ここに英語で要約を書いてください（45〜55語）" oninput="updateWordCount()"></textarea>
+    <div class="word-bar">
+      <div class="word-status">
+        <span class="word-count" id="wc-label">0語</span>
+        <span style="font-size:0.8rem; color:var(--gray)">目標：45〜55語</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="submit-btn" onclick="submitAnswer()">採点する</button>
+      <button class="btn btn-secondary" onclick="resetAnswer()">クリア</button>
+    </div>
+  </div>
+
+  <div id="feedback-section">
+    <div class="score-board">
+      <div class="total-score"><span id="total-pts">0</span><span> / 16点</span></div>
+      <div class="score-msg" id="score-msg"></div>
+    </div>
+    <div class="score-grid">
+      <div class="score-item" id="sc-content"><span class="score-label">📝 内容</span><span class="score-pts"><span id="pt-content">0</span><span> / 4</span></span></div>
+      <div class="score-item" id="sc-structure"><span class="score-label">🔗 構成</span><span class="score-pts"><span id="pt-structure">0</span><span> / 4</span></span></div>
+      <div class="score-item" id="sc-vocab"><span class="score-label">📚 語彙</span><span class="score-pts"><span id="pt-vocab">0</span><span> / 4</span></span></div>
+      <div class="score-item" id="sc-grammar"><span class="score-label">✅ 文法</span><span class="score-pts"><span id="pt-grammar">0</span><span> / 4</span></span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">💬 フィードバック</div>
+      <ul class="feedback-list" id="feedback-list"></ul>
+    </div>
+    <div class="card">
+      <div class="card-title">✅ 模範解答</div>
+      <div class="model-answer-box">
+        <p id="model-answer-text"></p>
+        <span class="model-word-badge" id="model-word-count"></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📌 解説・ポイント</div>
+      <div id="explanation-content"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="nextQuestion()">次の問題へ →</button>
+      <button class="btn btn-secondary" onclick="retryQuestion()">もう一度挑戦</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    topic: "睡眠と健康",
+    wordCount: 96,
+    minWords: 45, maxWords: 55,
+    passage: `Many people do not get enough sleep. Research shows that adults need around seven to eight hours of sleep each night to stay healthy. However, busy schedules and the use of smartphones before bed often prevent people from sleeping well.
+
+Lack of sleep can cause serious health problems. People who do not sleep enough tend to gain weight, because sleep affects the hormones that control hunger. In addition, poor sleep makes it harder to focus and remember things. Experts say that improving your sleep habits is one of the most important things you can do for your health.`,
+    modelAnswer: "Many adults do not get enough sleep due to busy lives and smartphone use. Insufficient sleep leads to various health issues, such as weight gain caused by hormonal changes, and difficulty concentrating and remembering. Therefore, experts emphasize that improving sleep habits is essential for maintaining good health.",
+    modelWords: 50,
+    keyPoints: [
+      { icon: "📌", text: "第1段落：原因（busy schedule・スマートフォン）を「due to」で圧縮" },
+      { icon: "📌", text: "第2段落：悪影響を「such as」でまとめ、結論を「Therefore」でつなぐ" },
+      { icon: "⚠️", text: "「Many people do not get enough sleep.」は元文コピー → 言い換えが必要！" },
+      { icon: "✅", text: "言い換え例：「Insufficient sleep」「leads to」「health issues」" }
+    ]
+  },
+  {
+    topic: "プラスチックごみ問題",
+    wordCount: 94,
+    minWords: 45, maxWords: 55,
+    passage: `Plastic waste has become one of the most serious environmental problems in the world. Every year, millions of tons of plastic are thrown away, and a large amount of it ends up in the ocean. This harms sea animals and pollutes the water.
+
+To solve this problem, some countries have introduced laws to reduce the use of single-use plastics, such as plastic bags and straws. Companies are also developing new materials that can replace plastic. However, experts say that individual efforts, such as recycling and reducing plastic use in daily life, are also necessary to make a real difference.`,
+    modelAnswer: "Plastic waste is a serious global issue, with large quantities ending up in the ocean and harming marine life. To address this, some governments have banned single-use plastics, and companies are creating alternative materials. Nevertheless, experts stress that personal actions, such as recycling and reducing plastic consumption, are equally important.",
+    modelWords: 53,
+    keyPoints: [
+      { icon: "📌", text: "段落1：プラスチックが海に流れ込み生態系に悪影響" },
+      { icon: "📌", text: "段落2：法的規制・企業の取り組み・個人の行動の3つを圧縮" },
+      { icon: "⚠️", text: "3つの情報（政府・企業・個人）すべてを入れると語数オーバーになりやすい → 「equally important」などでまとめる" },
+      { icon: "✅", text: "「Nevertheless」で逆説を示し、個人の努力を強調" }
+    ]
+  },
+  {
+    topic: "SNSと若者",
+    wordCount: 90,
+    minWords: 45, maxWords: 55,
+    passage: `Social media has become a big part of young people's lives. Many teenagers spend several hours each day using platforms such as Instagram and TikTok to connect with friends and share their experiences. This can help young people feel more connected to others and express their creativity.
+
+However, there are also concerns about the negative effects of social media. Studies have shown that spending too much time on social media can lead to feelings of anxiety and depression, particularly when young people compare themselves to others online. Parents and teachers are therefore encouraging young people to set limits on their screen time.`,
+    modelAnswer: "Social media plays a major role in teenagers' lives, helping them stay connected and express themselves creatively. However, excessive use has been linked to anxiety and depression, especially when young people compare themselves with others online. As a result, parents and educators are urging young people to limit their screen time.",
+    modelWords: 52,
+    keyPoints: [
+      { icon: "📌", text: "段落1：SNSのメリット（つながり・表現）" },
+      { icon: "📌", text: "段落2：デメリット（不安・うつ）→解決策（スクリーンタイム制限）" },
+      { icon: "⚠️", text: "「particularly when」→「especially when」に言い換えて多様な語彙を示す" },
+      { icon: "✅", text: "「As a result」で因果関係を明示" }
+    ]
+  },
+  {
+    topic: "食品ロス問題",
+    wordCount: 92,
+    minWords: 45, maxWords: 55,
+    passage: `Food waste is a growing problem around the world. Every year, about one third of all food produced for human consumption is lost or wasted. In wealthy countries, most waste happens at the consumer level, as people buy more food than they need and throw away leftovers.
+
+Reducing food waste is important for both the environment and the economy. When food is wasted, all the resources used to produce it, such as water, land, and energy, are also wasted. Some countries are encouraging people to plan their meals carefully and donate extra food to charity. Experts believe that small changes in daily habits can make a big difference.`,
+    modelAnswer: "About one third of the world's food is wasted each year, with most losses in wealthy nations occurring at the consumer level. This wastes resources such as water and energy. To tackle this, governments are promoting meal planning and food donations, as experts argue that individual lifestyle changes can significantly reduce food waste.",
+    modelWords: 54,
+    keyPoints: [
+      { icon: "📌", text: "段落1：食品ロスの現状（先進国では消費者レベルでの廃棄が多い）" },
+      { icon: "📌", text: "段落2：環境・経済への影響 + 解決策（計画的な食事・寄付）" },
+      { icon: "⚠️", text: "「one third」「one-third」どちらも可。ハイフンの有無は減点されない" },
+      { icon: "✅", text: "「To tackle this」で問題→解決策への転換を明示" }
+    ]
+  },
+  {
+    topic: "テレワークの普及",
+    wordCount: 95,
+    minWords: 45, maxWords: 55,
+    passage: `Working from home, often called remote work or teleworking, has become more common in many countries. The spread of the internet and communication technology has made it possible for many people to do their jobs from home. Some companies have continued to allow remote work even after the pandemic ended.
+
+Remote work has both advantages and disadvantages. On the positive side, workers can save time and money by not commuting, and they often report higher job satisfaction. On the negative side, some people find it difficult to stay motivated when working alone, and they miss the social connections of a traditional office. Companies need to find ways to support employees who work remotely.`,
+    modelAnswer: "Remote work has grown widespread thanks to advances in communication technology, with many companies continuing the practice after the pandemic. While it benefits workers by eliminating commuting and improving satisfaction, some employees struggle with motivation and social isolation when working alone. Therefore, companies need to develop support systems for remote workers.",
+    modelWords: 52,
+    keyPoints: [
+      { icon: "📌", text: "段落1：テレワーク普及の背景（ICT技術・パンデミック後も継続）" },
+      { icon: "📌", text: "段落2：メリット（通勤なし・満足度向上）とデメリット（孤立・やる気低下）を対比" },
+      { icon: "⚠️", text: "「On the positive side / On the negative side」は要約では「while」「however」に置き換える" },
+      { icon: "✅", text: "「Therefore, companies need to」で解決策の必要性をシンプルに結論付ける" }
+    ]
+  },
+  {
+    topic: "再生可能エネルギー",
+    wordCount: 93,
+    minWords: 45, maxWords: 55,
+    passage: `The world is facing a serious energy crisis due to the increasing demand for electricity and the limited supply of fossil fuels. Many scientists and governments believe that renewable energy sources, such as solar and wind power, are the best solution to this problem. These energy sources are clean and will never run out.
+
+However, switching to renewable energy is not easy. Solar and wind power depend on weather conditions, so they cannot always produce a stable supply of electricity. Building new power stations also requires a large amount of money. Despite these challenges, many countries are increasing their investment in renewable energy, as it is seen as essential for reducing carbon emissions and fighting climate change.`,
+    modelAnswer: "Fossil fuel shortages and rising energy demand have made renewable sources such as solar and wind power increasingly attractive. These clean, limitless resources are considered vital for reducing carbon emissions. However, their dependence on weather conditions creates supply instability, and infrastructure costs are high. Despite this, many countries are expanding investment in renewables to combat climate change.",
+    modelWords: 55,
+    keyPoints: [
+      { icon: "📌", text: "段落1：再エネのメリット（クリーン・枯渇しない）" },
+      { icon: "📌", text: "段落2：課題（天候依存・コスト高）+ 各国の投資拡大" },
+      { icon: "⚠️", text: "「solar and wind power」を2回使わず「renewables」と省略して語数を節約" },
+      { icon: "✅", text: "「Despite this」で課題を認めながらも前向きな結論につなぐ" }
+    ]
+  },
+  {
+    topic: "高齢化社会の課題",
+    wordCount: 91,
+    minWords: 45, maxWords: 55,
+    passage: `Many countries around the world are experiencing an aging population. The number of elderly people is increasing, while birth rates are falling. This is creating serious problems for society, as there are fewer working-age people to support the growing number of retirees.
+
+One major challenge is the rising cost of healthcare and pensions. As people live longer, governments must spend more money on medical care and social security. Some countries are trying to solve this problem by encouraging immigration to increase the workforce, or by raising the retirement age. However, these solutions are often controversial and not easily accepted by the public.`,
+    modelAnswer: "Falling birth rates and rising life expectancy are creating aging populations worldwide, reducing the working-age population that supports retirees. This drives up healthcare and pension costs. Some governments are responding by promoting immigration or raising the retirement age, though these measures remain controversial and face public resistance.",
+    modelWords: 50,
+    keyPoints: [
+      { icon: "📌", text: "段落1：高齢化の原因（少子化＋長寿化）→ 労働人口減少" },
+      { icon: "📌", text: "段落2：課題（医療・年金費増大）＋ 対策（移民・定年延長）" },
+      { icon: "⚠️", text: "「aging population」「aged society」どちらも可。同義語を使い分けることで語彙点を稼げる" },
+      { icon: "✅", text: "「though these measures remain controversial」で逆接を後置して自然な流れに" }
+    ]
+  },
+  {
+    topic: "観光業と環境問題",
+    wordCount: 94,
+    minWords: 45, maxWords: 55,
+    passage: `Tourism is one of the world's largest industries and brings many economic benefits to local communities. However, mass tourism can also cause serious environmental damage. Popular tourist destinations often suffer from overcrowding, pollution, and damage to natural habitats and historical sites.
+
+In recent years, the concept of sustainable tourism has gained attention as a way to protect the environment while still allowing people to travel. This approach encourages travelers to visit less popular areas, reduce their carbon footprint, and respect local cultures. Some countries have introduced visitor limits and fees to manage the number of tourists in fragile ecosystems. Experts believe that balancing tourism growth with environmental protection is essential for the future.`,
+    modelAnswer: "Tourism generates significant economic benefits but causes environmental damage through overcrowding and pollution. To address this, sustainable tourism has emerged, promoting visits to less popular areas and minimizing environmental impact. Some governments have also imposed visitor limits in vulnerable ecosystems, as experts argue that balancing tourism growth with conservation is crucial.",
+    modelWords: 53,
+    keyPoints: [
+      { icon: "📌", text: "段落1：観光業の経済的メリット vs 環境破壊（混雑・汚染・生態系損傷）" },
+      { icon: "📌", text: "段落2：持続可能な観光（環境配慮の旅行・入場制限）" },
+      { icon: "⚠️", text: "「sustainable tourism」は重要キーワード。コピーは避け、定義を簡潔に補足する" },
+      { icon: "✅", text: "「To address this」で問題→解決策の流れをスムーズにつなぐ" }
+    ]
+  },
+  {
+    topic: "グローバル化と文化",
+    wordCount: 89,
+    minWords: 45, maxWords: 55,
+    passage: `Globalization has connected people around the world through trade, communication, and the spread of popular culture. Many people enjoy access to foreign food, music, and movies that were not available in the past. This cultural exchange has helped people learn about different ways of life.
+
+However, globalization also has a negative side. Some experts worry that the spread of Western culture, particularly through media and entertainment, is causing local cultures and languages to disappear. Traditional customs and practices may be lost as younger generations prefer global trends. Many communities are now working to preserve their cultural heritage and encourage the use of local languages.`,
+    modelAnswer: "Globalization has enriched daily life by spreading food, music, and ideas across borders. However, the dominance of Western culture through global media threatens to erode local traditions and languages. In response, many communities are actively working to preserve their cultural heritage and promote the use of native languages.",
+    modelWords: 51,
+    keyPoints: [
+      { icon: "📌", text: "段落1：グローバル化のメリット（文化交流・生活の豊かさ）" },
+      { icon: "📌", text: "段落2：デメリット（西洋文化の普及による地域文化・言語の消滅）＋ 対策" },
+      { icon: "⚠️", text: "「In response」は自然な逆接・対応を示す接続語。「However」「Nevertheless」と使い分けよう" },
+      { icon: "✅", text: "「threatens to erode」で動詞を使って簡潔に意味を圧縮する表現" }
+    ]
+  },
+  {
+    topic: "ストレスとメンタルヘルス",
+    wordCount: 93,
+    minWords: 45, maxWords: 55,
+    passage: `Mental health problems, such as stress and anxiety, are becoming more common in modern society. Many people feel overwhelmed by the pressures of work, school, and daily life. Research shows that long-term stress can lead to serious physical health problems, including heart disease and a weakened immune system.
+
+Fortunately, there are many effective ways to manage stress. Regular exercise is one of the best methods, as it releases chemicals in the brain that improve mood. Mindfulness and meditation are also popular techniques for reducing anxiety. In addition, talking to friends, family, or a mental health professional can be very helpful. Experts recommend that people take steps to protect their mental health before problems become serious.`,
+    modelAnswer: "Stress and anxiety are increasingly prevalent in modern life, and prolonged stress can cause physical health problems such as heart disease. However, effective management strategies exist, including regular exercise, mindfulness, and seeking social support. Experts advise taking proactive measures to maintain mental health before conditions worsen.",
+    modelWords: 50,
+    keyPoints: [
+      { icon: "📌", text: "段落1：ストレス・不安の増加 → 長期的には身体的健康へのリスク" },
+      { icon: "📌", text: "段落2：対処法（運動・マインドフルネス・専門家への相談）を圧縮" },
+      { icon: "⚠️", text: "対処法は3つあるが「including A, B, and C」で1文に収めて語数節約" },
+      { icon: "✅", text: "「proactive measures」で「早めの行動」という意味を1語で表現できる" }
+    ]
+  }
+];
+
+let currentIndex = 0;
+let answered = false;
+
+function loadQuestion() {
+  const q = questions[currentIndex];
+  answered = false;
+  document.getElementById('topic-chip').textContent = q.topic;
+  document.getElementById('wordcount-chip').textContent = '元の文：' + q.wordCount + '語';
+  document.getElementById('passage-text').textContent = q.passage;
+  document.getElementById('answer-input').value = '';
+  document.getElementById('feedback-section').style.display = 'none';
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('q-counter').textContent = '問題 ' + (currentIndex + 1) + ' / ' + questions.length;
+  updateWordCount();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function countWords(text) {
+  return text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+}
+
+function updateWordCount() {
+  const q = questions[currentIndex];
+  const text = document.getElementById('answer-input').value;
+  const count = countWords(text);
+  const label = document.getElementById('wc-label');
+  const fill = document.getElementById('progress-fill');
+  label.textContent = count + '語';
+  label.className = 'word-count ' + (count < q.minWords ? 'low' : count > q.maxWords ? 'over' : 'ok');
+  const pct = Math.min(count / q.maxWords * 100, 110);
+  fill.style.width = pct + '%';
+  fill.style.background = count < q.minWords ? 'var(--accent)' : count > q.maxWords ? 'var(--red)' : 'var(--green)';
+}
+
+function resetAnswer() {
+  document.getElementById('answer-input').value = '';
+  updateWordCount();
+}
+
+function scoreAnswer(userText, q) {
+  const user = userText.toLowerCase();
+  const model = q.modelAnswer.toLowerCase();
+  const userWords = user.split(/\s+/);
+  const modelWords = model.split(/\s+/).filter(w => w.length > 4);
+  const count = countWords(userText);
+  let content = 0, structure = 0, vocab = 0, grammar = 0;
+  const feedback = [];
+
+  // 内容
+  const hits = modelWords.filter(w => user.includes(w.replace(/[^a-z]/g, ''))).length;
+  const ratio = hits / Math.max(modelWords.length, 1);
+  content = ratio >= 0.5 ? 4 : ratio >= 0.35 ? 3 : ratio >= 0.2 ? 2 : 1;
+  if (content < 3) feedback.push('📝 内容：模範解答のキーワードをより多く含めましょう。両段落の主要情報が入っていますか？');
+
+  // 構成
+  const connectives = ['however','therefore','thus','moreover','furthermore','nevertheless','consequently','in addition','as a result','although','while','whereas'];
+  const hasConn = connectives.some(c => user.includes(c));
+  const sentences = userText.split(/[.!?]+/).filter(s => s.trim().length > 3).length;
+  structure = (hasConn ? 2 : 0) + (sentences >= 2 ? 1 : 0) + (sentences <= 4 ? 1 : 0);
+  if (!hasConn) feedback.push('🔗 構成：however / therefore などの接続語を使って論理的なつながりを示しましょう。');
+  if (sentences < 2) feedback.push('🔗 構成：2〜3文で書くと構成点が上がります。');
+
+  // 語彙
+  const advWords = ['insufficient','excessive','significant','crucial','essential','promote','enhance','reduce','contribute','address','emphasize','demonstrate','indicate','establish','maintain'];
+  const advCount = advWords.filter(w => user.includes(w)).length;
+  const uniqueCount = new Set(userWords.map(w => w.replace(/[^a-z]/g, ''))).size;
+  vocab = Math.min(4, advCount + (uniqueCount > 25 ? 2 : uniqueCount > 18 ? 1 : 0));
+  if (vocab < 2) feedback.push('📚 語彙：essential / significant / contribute などのアカデミックな語彙を積極的に使いましょう。');
+
+  // 文法・語数
+  const inRange = count >= q.minWords && count <= q.maxWords;
+  const avgLen = userWords.length / Math.max(sentences, 1);
+  grammar = (inRange ? 2 : 1) + (avgLen >= 8 && avgLen <= 25 ? 1 : 0) + (userText.includes(',') ? 1 : 0);
+  if (!inRange) feedback.push('✅ 語数：' + count + '語です。目標の' + q.minWords + '〜' + q.maxWords + '語に調整しましょう。');
+
+  if (feedback.length === 0) feedback.push('🏆 素晴らしい要約です！内容・構成・語彙・語数すべてバランスが取れています。');
+
+  return { content, structure, vocab, grammar, total: content + structure + vocab + grammar, feedback };
+}
+
+function getScoreClass(pt) {
+  if (pt >= 4) return 'great';
+  if (pt >= 3) return 'good';
+  if (pt >= 2) return 'fair';
+  return 'poor';
+}
+
+function getScoreMsg(total) {
+  if (total >= 14) return '🏆 素晴らしい！英検本番でも十分通用するレベルです';
+  if (total >= 11) return '👍 よくできています！細部を磨けば満点も狙えます';
+  if (total >= 8)  return '📚 あと一歩！模範解答と見比べて改善点を確認しましょう';
+  if (total >= 5)  return '🔰 基礎を固めましょう。接続語と言い換えを意識して';
+  return '💪 まずは模範解答の構造をしっかり分析しましょう';
+}
+
+function submitAnswer() {
+  const userText = document.getElementById('answer-input').value.trim();
+  if (userText.length < 10) { alert('解答を入力してください。'); return; }
+  answered = true;
+  const q = questions[currentIndex];
+  const result = scoreAnswer(userText, q);
+  document.getElementById('total-pts').textContent = result.total;
+  document.getElementById('score-msg').textContent = getScoreMsg(result.total);
+  ['content','structure','vocab','grammar'].forEach(key => {
+    document.getElementById('pt-' + key).textContent = result[key];
+    document.getElementById('sc-' + key).className = 'score-item ' + getScoreClass(result[key]);
+  });
+  const ul = document.getElementById('feedback-list');
+  ul.innerHTML = '';
+  result.feedback.forEach(f => {
+    const li = document.createElement('li'); li.textContent = f; ul.appendChild(li);
+  });
+  document.getElementById('model-answer-text').textContent = q.modelAnswer;
+  document.getElementById('model-word-count').textContent = '語数：' + q.modelWords + '語';
+  const exDiv = document.getElementById('explanation-content');
+  exDiv.innerHTML = '';
+  q.keyPoints.forEach(kp => {
+    const div = document.createElement('div');
+    div.className = 'key-point';
+    div.innerHTML = '<span class="icon">' + kp.icon + '</span><span>' + kp.text + '</span>';
+    exDiv.appendChild(div);
+  });
+  document.getElementById('feedback-section').style.display = 'block';
+  document.getElementById('submit-btn').disabled = true;
+  setTimeout(() => { document.getElementById('feedback-section').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+}
+
+function retryQuestion() {
+  answered = false;
+  document.getElementById('answer-input').value = '';
+  updateWordCount();
+  document.getElementById('feedback-section').style.display = 'none';
+  document.getElementById('submit-btn').disabled = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextQuestion() {
+  currentIndex = (currentIndex + 1) % questions.length;
+  loadQuestion();
+}
+
+loadQuestion();
+</script>
+</body>
+</html>
