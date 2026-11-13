@@ -23,11 +23,6 @@
   header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: 0.05em; }
   header span { font-size: 0.85rem; opacity: 0.8; }
   .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
-  .grade-nav { display: flex; gap: 10px; margin-bottom: 24px; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-  .grade-link { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px; background: white; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; color: var(--gray); transition: all 0.2s; display: block; }
-  .grade-link:hover { border-color: var(--blue); color: var(--blue); }
-  .grade-link.active { background: var(--blue); border-color: var(--blue); color: white; box-shadow: 0 3px 8px rgba(46,116,181,0.35); }
-  .grade-link .badge { display: block; font-size: 0.7rem; font-weight: 400; margin-top: 2px; opacity: 0.75; }
   .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 20px; }
   .card-title { font-size: 0.8rem; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
   .card-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background: var(--blue); border-radius: 2px; }
@@ -86,13 +81,7 @@
   <span id="q-counter">問題 1 / 10</span>
 </header>
 <div class="container">
-  <nav class="grade-nav">
-    <a class="grade-link active" href="2kyu.html">2級<span class="badge">45〜55語</span></a>
-    <a class="grade-link" href="pre1kyu.html">準1級<span class="badge">60〜70語</span></a>
-    <a class="grade-link" href="1kyu.html">1級<span class="badge">90〜110語</span></a>
-  </nav>
-
-  <div class="card">
+<div class="card">
     <div class="card-title">📄 英文パッセージ</div>
     <div class="info-row">
       <span class="info-chip topic" id="topic-chip">トピック</span>
