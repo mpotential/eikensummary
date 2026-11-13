@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英検準1級 要約対策アプリ</title>
+<style>
+  :root { --navy:#1F3864;--blue:#2E74B5;--light-blue:#DEEAF1;--accent:#E67E22;--green:#27AE60;--red:#E74C3C;--gray:#7F8C8D;--bg:#F4F6F9;--white:#FFFFFF;--border:#BDC3C7; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI','Helvetica Neue',Arial,'Noto Sans JP',sans-serif;background:var(--bg);color:#2C3E50;min-height:100vh;}
+  header{background:linear-gradient(135deg,#1a5276 0%,#1abc9c 100%);color:white;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+  header h1{font-size:1.3rem;font-weight:700;letter-spacing:0.05em;}
+  header span{font-size:0.85rem;opacity:0.8;}
+  .container{max-width:900px;margin:0 auto;padding:24px 16px;}
+  .card{background:white;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:20px;}
+  .card-title{font-size:0.8rem;font-weight:700;color:#1a5276;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+  .card-title::before{content:'';display:inline-block;width:4px;height:16px;background:#1abc9c;border-radius:2px;}
+  .info-row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .info-chip{background:#D5F5E3;color:#1E8449;font-size:0.8rem;font-weight:600;padding:4px 12px;border-radius:20px;}
+  .info-chip.topic{background:#FEF9E7;color:#7D6608;}
+  #passage-text{font-size:1rem;line-height:1.85;color:#2C3E50;white-space:pre-line;}
+  textarea{width:100%;min-height:140px;padding:14px;border:2px solid var(--border);border-radius:8px;font-size:1rem;line-height:1.7;resize:vertical;font-family:inherit;transition:border-color 0.2s;}
+  textarea:focus{outline:none;border-color:#1abc9c;}
+  .word-bar{margin-top:10px;}
+  .word-status{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .word-count{font-size:0.95rem;font-weight:600;}
+  .word-count.ok{color:var(--green);}
+  .word-count.low{color:var(--accent);}
+  .word-count.over{color:var(--red);}
+  .progress-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .progress-fill{height:100%;border-radius:3px;transition:width 0.3s,background 0.3s;background:var(--blue);}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+  .btn{padding:12px 24px;border:none;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+  .btn-primary{background:#1abc9c;color:white;flex:1;min-width:120px;}
+  .btn-primary:hover{background:#1a5276;}
+  .btn-primary:disabled{background:var(--border);cursor:not-allowed;}
+  .btn-secondary{background:#D5F5E3;color:#1E8449;}
+  .btn-secondary:hover{background:#a9dfbf;}
+  #feedback-section{display:none;}
+  .score-board{background:linear-gradient(135deg,#1a5276 0%,#1abc9c 100%);border-radius:12px;padding:20px;color:white;text-align:center;margin-bottom:20px;}
+  .total-score{font-size:3rem;font-weight:800;line-height:1;}
+  .total-score span{font-size:1.2rem;font-weight:400;opacity:0.8;}
+  .score-msg{font-size:0.95rem;margin-top:8px;opacity:0.9;}
+  .score-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;}
+  .score-item{background:white;border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center;border-left:4px solid var(--border);}
+  .score-item.great{border-color:var(--green);}
+  .score-item.good{border-color:var(--blue);}
+  .score-item.fair{border-color:var(--accent);}
+  .score-item.poor{border-color:var(--red);}
+  .score-label{font-size:0.9rem;font-weight:600;color:#2C3E50;}
+  .score-pts{font-size:1.4rem;font-weight:800;color:var(--navy);}
+  .score-pts span{font-size:0.75rem;color:var(--gray);}
+  .feedback-list{list-style:none;}
+  .feedback-list li{padding:10px 14px;border-bottom:1px solid #EEF0F3;font-size:0.9rem;line-height:1.6;}
+  .feedback-list li:last-child{border-bottom:none;}
+  .model-answer-box{background:#F0FAF4;border:2px solid #A9DFBF;border-radius:10px;padding:16px;}
+  .model-answer-box p{font-size:1rem;line-height:1.8;color:#1E8449;}
+  .model-word-badge{display:inline-block;background:var(--green);color:white;font-size:0.8rem;font-weight:600;padding:2px 10px;border-radius:20px;margin-top:8px;}
+  .key-point{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #EEF0F3;font-size:0.9rem;line-height:1.6;}
+  .key-point:last-child{border-bottom:none;}
+  .key-point .icon{font-size:1.1rem;flex-shrink:0;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎯 英検準1級 要約対策アプリ</h1>
+  <span id="q-counter">問題 1 / 10</span>
+</header>
+<div class="container">
+<div class="card">
+    <div class="card-title">📄 英文パッセージ</div>
+    <div class="info-row">
+      <span class="info-chip topic" id="topic-chip">トピック</span>
+      <span class="info-chip" id="wordcount-chip">語数</span>
+      <span class="info-chip">要約目標：60〜70語</span>
+    </div>
+    <div id="passage-text"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">✏️ あなたの要約</div>
+    <textarea id="answer-input" placeholder="ここに英語で要約を書いてください（60〜70語）" oninput="updateWordCount()"></textarea>
+    <div class="word-bar">
+      <div class="word-status">
+        <span class="word-count" id="wc-label">0語</span>
+        <span style="font-size:0.8rem;color:var(--gray)">目標：60〜70語</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="submit-btn" onclick="submitAnswer()">採点する</button>
+      <button class="btn btn-secondary" onclick="resetAnswer()">クリア</button>
+    </div>
+  </div>
+  <div id="feedback-section">
+    <div class="score-board">
+      <div class="total-score"><span id="total-pts">0</span><span> / 16点</span></div>
+      <div class="score-msg" id="score-msg"></div>
+    </div>
+    <div class="score-grid">
+      <div class="score-item" id="sc-content"><span class="score-label">📝 内容</span><span class="score-pts"><span id="pt-content">0</span><span> / 4</span></span></div>
+      <div class="score-item" id="sc-structure"><span class="score-label">🔗 構成</span><span class="score-pts"><span id="pt-structure">0</span><span> / 4</span></span></div>
+      <div class="score-item" id="sc-vocab"><span class="score-label">📚 語彙</span><span class="score-pts"><span id="pt-vocab">0</span><span> / 4</span></span></div>
+      <div class="score-item" id="sc-grammar"><span class="score-label">✅ 文法</span><span class="score-pts"><span id="pt-grammar">0</span><span> / 4</span></span></div>
+    </div>
+    <div class="card"><div class="card-title">💬 フィードバック</div><ul class="feedback-list" id="feedback-list"></ul></div>
+    <div class="card"><div class="card-title">✅ 模範解答</div><div class="model-answer-box"><p id="model-answer-text"></p><span class="model-word-badge" id="model-word-count"></span></div></div>
+    <div class="card"><div class="card-title">📌 解説・ポイント</div><div id="explanation-content"></div></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="nextQuestion()">次の問題へ →</button>
+      <button class="btn btn-secondary" onclick="retryQuestion()">もう一度挑戦</button>
+    </div>
+  </div>
+</div>
+<script>
+const questions = [
+  {
+    topic:"テレワークの光と影",wordCount:115,minWords:60,maxWords:70,
+    passage:`Remote work has become increasingly common in many countries following the global shift in working practices. Supporters argue that it offers workers greater flexibility, allowing them to better balance their professional and personal lives. Moreover, companies can reduce overhead costs, such as office rental fees, by allowing employees to work from home.
+
+However, remote work also brings significant challenges. Many employees struggle with feelings of isolation, as they lose the informal social interactions that occur naturally in a workplace. Furthermore, the boundary between work and personal life can become unclear, leading to longer working hours and increased stress. Critics therefore argue that without proper management strategies, remote work may ultimately reduce both employee well-being and overall productivity.`,
+    modelAnswer:"Remote work has grown popular due to its advantages, including greater flexibility for workers and reduced costs for companies. Nevertheless, it presents serious drawbacks. Employees often feel isolated without daily social interaction, and the blurring of boundaries between work and private life can result in excessive working hours and stress. Consequently, critics warn that, unless properly managed, remote work could harm both workers' well-being and productivity.",
+    modelWords:65,
+    keyPoints:[
+      {icon:"📌",text:"対比構造：メリット（flexibility・コスト削減）vs デメリット（孤立・境界線の崩壊）"},
+      {icon:"📌",text:"「Nevertheless」「Consequently」でフォーマルな接続を示す"},
+      {icon:"⚠️",text:"「the boundary...can become unclear」→「the blurring of boundaries」で名詞句化・語数圧縮"},
+      {icon:"✅",text:"「unless properly managed」で条件節を使い意味を正確に伝える"}
+    ]
+  },
+  {
+    topic:"人工知能と雇用",wordCount:120,minWords:60,maxWords:70,
+    passage:`Artificial intelligence is rapidly transforming the global economy. Proponents of AI argue that it will generate new industries and employment opportunities, just as previous technological revolutions have done. They point out that AI can take over repetitive tasks, freeing workers to engage in more creative and fulfilling roles.
+
+Critics, however, warn that the transition may be far more disruptive this time. Unlike past technological shifts, AI has the potential to automate a wide range of cognitive tasks, threatening not only manual workers but also highly skilled professionals in fields such as law, medicine, and finance. Some economists predict that if governments fail to invest adequately in retraining programs and social safety nets, widespread unemployment could destabilize societies in the coming decades.`,
+    modelAnswer:"AI is rapidly reshaping the economy, and its supporters claim it will create new jobs and allow workers to focus on more creative tasks, as seen in previous technological revolutions. However, critics argue that AI poses a greater threat than past technologies, as it can automate cognitive tasks across many professions. Economists warn that without sufficient government investment in retraining and social support, widespread unemployment could destabilize society.",
+    modelWords:68,
+    keyPoints:[
+      {icon:"📌",text:"両者の意見（賛成派・反対派）を対比させる構造"},
+      {icon:"📌",text:"「as seen in previous...revolutions」で歴史的背景を簡潔に補足"},
+      {icon:"⚠️",text:"「threatening not only A but also B」→「can automate...across many professions」で圧縮"},
+      {icon:"✅",text:"「without sufficient government investment」で条件を明確にした警告表現"}
+    ]
+  },
+  {
+    topic:"メディアリテラシーと偽情報",wordCount:118,minWords:60,maxWords:70,
+    passage:`The rapid spread of misinformation through social media platforms has become a major concern in contemporary society. False information can spread faster than accurate reporting, potentially influencing public opinion, elections, and health behaviors. The COVID-19 pandemic highlighted how dangerous health misinformation can be, as people made decisions based on unverified claims.
+
+In response, governments and technology companies have been exploring strategies to combat misinformation. Social media platforms have implemented fact-checking systems and warning labels on potentially misleading content. Some countries have introduced legislation targeting the deliberate spread of false information. However, critics argue that such measures may risk infringing on freedom of expression, making it difficult to strike the right balance between combating misinformation and protecting civil liberties.`,
+    modelAnswer:"The rapid spread of misinformation on social media poses serious risks to public health and democracy, as demonstrated during the COVID-19 pandemic. In response, platforms have introduced fact-checking and warning labels, while some governments have enacted legislation against deliberate falsehoods. Critics, however, warn that such measures could threaten freedom of expression, making the balance between misinformation control and civil liberties difficult to maintain.",
+    modelWords:66,
+    keyPoints:[
+      {icon:"📌",text:"問題提起（偽情報の拡散）→ 対策（ファクトチェック・立法）→ 批判（表現の自由）の3段構造"},
+      {icon:"📌",text:"「as demonstrated during...」で具体例を後置して文をコンパクトに"},
+      {icon:"⚠️",text:"「infringing on freedom of expression」→「threaten freedom of expression」で動詞化して圧縮"},
+      {icon:"✅",text:"「making the balance...difficult to maintain」で結論を不定詞句でまとめる"}
+    ]
+  },
+  {
+    topic:"食料安全保障",wordCount:116,minWords:60,maxWords:70,
+    passage:`Food security — the ability of all people to access sufficient, safe, and nutritious food — is an increasingly pressing global challenge. Climate change is disrupting agricultural production worldwide, causing more frequent droughts, floods, and extreme weather events that damage crops and reduce yields. At the same time, the global population is projected to reach nearly ten billion by 2050, placing further pressure on food systems.
+
+To address these threats, researchers and policymakers are exploring a range of solutions. Advances in agricultural technology, including drought-resistant crops and precision farming, hold promise for increasing yields while reducing environmental impact. Reducing food waste throughout the supply chain could also significantly improve food availability. However, experts note that solutions must be equitably distributed, as food insecurity disproportionately affects developing nations.`,
+    modelAnswer:"Food security is under growing threat from climate change, which disrupts agriculture through extreme weather, and from rapid population growth. To address this, technologies such as drought-resistant crops and precision farming are being developed to boost yields sustainably, while reducing supply chain waste could improve food availability. Experts stress, however, that solutions must be distributed equitably, as food insecurity disproportionately impacts developing nations.",
+    modelWords:66,
+    keyPoints:[
+      {icon:"📌",text:"2段落：脅威（気候変動・人口増加）→ 解決策（農業技術・廃棄削減）+ 公平性の問題"},
+      {icon:"📌",text:"「which disrupts agriculture through extreme weather」で関係節を使い情報を圧縮"},
+      {icon:"⚠️",text:"「equitably distributed」は重要表現。「disproportionately」も語彙点を上げる語"},
+      {icon:"✅",text:"「Experts stress, however, that」でhoweverを文中挿入してフォーマルさを出す"}
+    ]
+  },
+  {
+    topic:"都市化と環境問題",wordCount:117,minWords:60,maxWords:70,
+    passage:`Urbanization — the migration of populations from rural areas to cities — is one of the most significant demographic trends of the 21st century. Currently, more than half the world's population lives in urban areas, and this proportion is expected to rise to nearly seventy percent by 2050. Cities offer economic opportunities and improved access to services, driving people to migrate.
+
+However, rapid and unplanned urban growth creates serious environmental and social problems. Increased energy consumption, vehicle emissions, and industrial activity contribute to air and water pollution. The expansion of cities into surrounding natural areas destroys habitats and reduces biodiversity. Many urban areas also struggle with inadequate housing, traffic congestion, and strained infrastructure. Urban planners increasingly advocate for sustainable city design that prioritizes green spaces, public transportation, and energy-efficient buildings.`,
+    modelAnswer:"Urbanization is accelerating globally, with cities expected to house around seventy percent of the world's population by 2050, driven by economic opportunity. However, rapid, unplanned growth leads to pollution, habitat destruction, and strained infrastructure. To address these challenges, urban planners increasingly advocate for sustainable city design incorporating green spaces, efficient public transport, and energy-efficient buildings.",
+    modelWords:62,
+    keyPoints:[
+      {icon:"📌",text:"都市化の現状・原因 → 環境・社会問題 → 持続可能な都市設計への言及"},
+      {icon:"📌",text:"「driven by economic opportunity」を後置分詞構文で付け加えコンパクトに"},
+      {icon:"⚠️",text:"問題の列挙（pollution・habitat destruction・strained infrastructure）を3語以内に圧縮"},
+      {icon:"✅",text:"「incorporating」で現在分詞を使い「〜を含む」という意味を簡潔に表現"}
+    ]
+  },
+  {
+    topic:"教育格差と機会均等",wordCount:119,minWords:60,maxWords:70,
+    passage:`Educational inequality remains a persistent challenge in both developed and developing countries. Children from low-income families often attend underfunded schools with fewer qualified teachers, outdated materials, and limited access to technology. These disadvantages compound over time, making it significantly harder for students from disadvantaged backgrounds to achieve academic success and secure well-paying jobs.
+
+The expansion of digital technology has created new opportunities to address educational inequality. Online learning platforms can provide high-quality educational content to students regardless of their geographic location or economic background. However, the benefits of digital education are unevenly distributed, as many students in low-income households lack reliable internet access or suitable devices. Bridging this "digital divide" is considered essential if technology is to serve as an equalizing force in education.`,
+    modelAnswer:"Educational inequality persists globally, with children from low-income families attending under-resourced schools, limiting their future opportunities. While digital technology offers a potential solution by providing accessible, high-quality content, its benefits remain uneven due to the digital divide — many disadvantaged students lack reliable internet or devices. Closing this gap is considered essential for technology to serve as a true equalizing force in education.",
+    modelWords:67,
+    keyPoints:[
+      {icon:"📌",text:"問題（低所得家庭の教育格差）→ 解決策（デジタル教育）→ 新たな課題（デジタルデバイド）"},
+      {icon:"📌",text:"「—」（ダッシュ）を使って補足説明を挿入するテクニック"},
+      {icon:"⚠️",text:"「compound over time」は重要表現。「gradually worsen」と言い換えてもOK"},
+      {icon:"✅",text:"「to serve as a true equalizing force」で不定詞による目的を明示して締める"}
+    ]
+  },
+  {
+    topic:"企業と持続可能性",wordCount:115,minWords:60,maxWords:70,
+    passage:`Sustainability has moved from the margins to the mainstream of business strategy. Increasing pressure from consumers, investors, and governments has pushed companies to adopt environmentally and socially responsible practices. Many corporations now publish annual sustainability reports and set targets to reduce carbon emissions, minimize waste, and improve labor conditions throughout their supply chains.
+
+Critics, however, question whether corporate sustainability initiatives reflect genuine commitment or merely serve as a form of "greenwashing" — superficial marketing designed to appeal to environmentally conscious consumers without substantive change. Research suggests that companies prioritizing short-term profits may adopt symbolic gestures rather than transformative practices. For sustainability to become truly embedded in corporate culture, experts argue that stronger regulatory frameworks and transparent reporting standards are essential.`,
+    modelAnswer:"Sustainability has become central to business strategy, driven by pressure from consumers, investors, and governments, with many companies setting emission and waste reduction targets. Critics, however, warn that some initiatives may amount to greenwashing — superficial efforts to appear responsible without meaningful change. Experts therefore argue that stronger regulations and transparent reporting are needed to ensure genuine corporate commitment to sustainability.",
+    modelWords:65,
+    keyPoints:[
+      {icon:"📌",text:"企業の持続可能性への取り組み増加 → グリーンウォッシングへの批判 → 規制強化の必要性"},
+      {icon:"📌",text:"「greenwashing」の定義を「—」の後に補足するテクニック（本文コピーOK）"},
+      {icon:"⚠️",text:"「superficial marketing」を「superficial efforts to appear responsible」に言い換え"},
+      {icon:"✅",text:"「to ensure genuine corporate commitment」で不定詞の目的節でまとめる"}
+    ]
+  },
+  {
+    topic:"メンタルヘルスと職場",wordCount:118,minWords:60,maxWords:70,
+    passage:`Mental health in the workplace has gained increasing attention in recent years, as rising rates of burnout, anxiety, and depression among employees have become recognized as significant business concerns. Research indicates that poor mental health leads to reduced productivity, increased absenteeism, and higher staff turnover, costing companies substantial amounts annually.
+
+In response, many organizations have begun investing in employee mental health programs, including counseling services, flexible working arrangements, and mental health awareness training. Some companies have appointed dedicated mental health officers to oversee well-being initiatives. However, stigma surrounding mental health issues remains a significant barrier, with many employees reluctant to seek help for fear of professional consequences. Experts argue that creating an open, supportive workplace culture is ultimately more effective than providing isolated programs.`,
+    modelAnswer:"Workplace mental health has become a significant business concern, as burnout and anxiety reduce productivity, increase absenteeism, and raise staff turnover costs. Many companies now offer counseling, flexible hours, and awareness training in response. However, persistent stigma discourages employees from seeking help, leading experts to argue that building an open, supportive workplace culture is more effective than isolated programs alone.",
+    modelWords:65,
+    keyPoints:[
+      {icon:"📌",text:"問題（バーンアウト・不安による生産性低下・欠勤・離職）→ 対策 → 残る課題（スティグマ）"},
+      {icon:"📌",text:"「reduce productivity, increase absenteeism, and raise staff turnover costs」で3点を並列"},
+      {icon:"⚠️",text:"「reluctant to seek help for fear of professional consequences」→「discourages employees from seeking help」に圧縮"},
+      {icon:"✅",text:"「more effective than isolated programs alone」で比較表現を使ったまとめ"}
+    ]
+  },
+  {
+    topic:"ジェンダー平等と職場",wordCount:117,minWords:60,maxWords:70,
+    passage:`Despite significant progress in recent decades, gender inequality in the workplace remains a widespread concern. Women continue to be underrepresented in senior management and leadership positions across many industries. The gender pay gap — the difference in average earnings between men and women — persists globally, even when factors such as education and experience are taken into account.
+
+Advocates for gender equality argue that diverse leadership teams are not only more equitable but also more effective, as research suggests that companies with greater gender diversity tend to perform better financially. To promote equality, many governments and organizations have introduced policies such as mandatory pay transparency, parental leave for both parents, and targets for female representation on corporate boards. Critics, however, contend that such policies can be counterproductive if they prioritize numbers over genuine cultural change.`,
+    modelAnswer:"Gender inequality persists in workplaces globally, with women underrepresented in leadership and the gender pay gap remaining despite comparable qualifications. Research suggests that gender-diverse leadership improves financial performance, motivating companies and governments to introduce pay transparency, shared parental leave, and board diversity targets. Critics warn, however, that quota-based policies may be counterproductive without accompanying cultural change.",
+    modelWords:62,
+    keyPoints:[
+      {icon:"📌",text:"現状（女性の過少代表・賃金格差）→ 多様性のビジネスメリット → 政策 → 批判"},
+      {icon:"📌",text:"「despite comparable qualifications」で「学歴・経験が同等でも」という意味を後置"},
+      {icon:"⚠️",text:"具体的な政策（pay transparency・parental leave・board diversity targets）を列挙して圧縮"},
+      {icon:"✅",text:"「without accompanying cultural change」で条件を追加して批判の内容を正確に伝える"}
+    ]
+  },
+  {
+    topic:"高齢化と介護問題",wordCount:116,minWords:60,maxWords:70,
+    passage:`Aging populations in many countries are creating unprecedented demand for elder care services. As the proportion of people aged 65 and over increases, governments face growing pressure to provide adequate healthcare, residential care, and community support for the elderly. At the same time, declining birth rates mean that there are fewer working-age adults available to fill caregiving roles, both professionally and within families.
+
+The shortage of care workers is a particularly acute problem in countries with rapidly aging populations, such as Japan and several European nations. Many governments are exploring solutions including attracting immigrant care workers, increasing automation in care settings, and strengthening support for family caregivers. However, experts caution that technology cannot replace the human connection essential to quality care, and that long-term solutions must prioritize caregiver training, adequate compensation, and sustainable workforce planning.`,
+    modelAnswer:"Aging populations are creating surging demand for elder care while declining birth rates reduce the pool of available caregivers, creating a critical shortage. Governments are responding by recruiting immigrant workers, introducing care automation, and supporting family caregivers. Experts caution, however, that technology cannot replace human connection in care, and sustainable solutions must prioritize caregiver training and adequate compensation.",
+    modelWords:64,
+    keyPoints:[
+      {icon:"📌",text:"高齢化による需要増 ×少子化による供給減 → ケアワーカー不足 → 対策 → 専門家の警告"},
+      {icon:"📌",text:"「creating a critical shortage」で分詞構文を使って2つの原因を1文でまとめる"},
+      {icon:"⚠️",text:"「human connection essential to quality care」は重要表現。「human touch」とも言い換え可"},
+      {icon:"✅",text:"「must prioritize A and B」で優先すべき点を2つ明確に示して締める"}
+    ]
+  }
+];
+
+let currentIndex = 0;
+let answered = false;
+
+function loadQuestion() {
+  const q = questions[currentIndex];
+  answered = false;
+  document.getElementById('topic-chip').textContent = q.topic;
+  document.getElementById('wordcount-chip').textContent = '元の文：' + q.wordCount + '語';
+  document.getElementById('passage-text').textContent = q.passage;
+  document.getElementById('answer-input').value = '';
+  document.getElementById('feedback-section').style.display = 'none';
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('q-counter').textContent = '問題 ' + (currentIndex + 1) + ' / ' + questions.length;
+  updateWordCount();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function countWords(text) {
+  return text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+}
+
+function updateWordCount() {
+  const q = questions[currentIndex];
+  const text = document.getElementById('answer-input').value;
+  const count = countWords(text);
+  const label = document.getElementById('wc-label');
+  const fill = document.getElementById('progress-fill');
+  label.textContent = count + '語';
+  label.className = 'word-count ' + (count < q.minWords ? 'low' : count > q.maxWords ? 'over' : 'ok');
+  const pct = Math.min(count / q.maxWords * 100, 110);
+  fill.style.width = pct + '%';
+  fill.style.background = count < q.minWords ? 'var(--accent)' : count > q.maxWords ? 'var(--red)' : 'var(--green)';
+}
+
+function resetAnswer() { document.getElementById('answer-input').value = ''; updateWordCount(); }
+
+function scoreAnswer(userText, q) {
+  const user = userText.toLowerCase();
+  const model = q.modelAnswer.toLowerCase();
+  const userWords = user.split(/\s+/);
+  const modelKeywords = model.split(/\s+/).filter(w => w.length > 4);
+  const count = countWords(userText);
+  let content = 0, structure = 0, vocab = 0, grammar = 0;
+  const feedback = [];
+  const hits = modelKeywords.filter(w => user.includes(w.replace(/[^a-z]/g,''))).length;
+  const ratio = hits / Math.max(modelKeywords.length, 1);
+  content = ratio >= 0.5 ? 4 : ratio >= 0.35 ? 3 : ratio >= 0.2 ? 2 : 1;
+  if (content < 3) feedback.push('📝 内容：模範解答のキーワードをより多く含めましょう。両段落の主要情報が入っていますか？');
+  const connectives = ['however','therefore','thus','moreover','furthermore','nevertheless','consequently','in addition','as a result','although','while','whereas','despite','yet'];
+  const connCount = connectives.filter(c => user.includes(c)).length;
+  const sentences = userText.split(/[.!?]+/).filter(s => s.trim().length > 3).length;
+  structure = Math.min(4, connCount * 2 + (sentences >= 2 ? 1 : 0) + (sentences <= 5 ? 1 : 0));
+  if (connCount === 0) feedback.push('🔗 構成：however / nevertheless などの接続語を使って論理的なつながりを示しましょう。');
+  const advWords = ['insufficient','excessive','significant','crucial','essential','promote','enhance','reduce','contribute','address','emphasize','demonstrate','indicate','establish','maintain','advocate','persist','undermine','facilitate','exacerbate'];
+  const advCount = advWords.filter(w => user.includes(w)).length;
+  const uniqueCount = new Set(userWords.map(w => w.replace(/[^a-z]/g,''))).size;
+  vocab = Math.min(4, advCount + (uniqueCount > 32 ? 2 : uniqueCount > 24 ? 1 : 0));
+  if (vocab < 2) feedback.push('📚 語彙：significant / advocate / persist などの学術語彙を積極的に使いましょう。');
+  const inRange = count >= q.minWords && count <= q.maxWords;
+  const avgLen = userWords.length / Math.max(sentences, 1);
+  grammar = (inRange ? 2 : 1) + (avgLen >= 10 && avgLen <= 28 ? 1 : 0) + (userText.includes(',') ? 1 : 0);
+  if (!inRange) feedback.push('✅ 語数：' + count + '語です。目標の' + q.minWords + '〜' + q.maxWords + '語に調整しましょう。');
+  if (feedback.length === 0) feedback.push('🏆 素晴らしい要約です！内容・構成・語彙・語数すべてバランスが取れています。');
+  return { content, structure, vocab, grammar, total: content + structure + vocab + grammar, feedback };
+}
+
+function getScoreClass(pt) { return pt >= 4 ? 'great' : pt >= 3 ? 'good' : pt >= 2 ? 'fair' : 'poor'; }
+function getScoreMsg(total) {
+  if (total >= 14) return '🏆 素晴らしい！英検本番でも十分通用するレベルです';
+  if (total >= 11) return '👍 よくできています！細部を磨けば満点も狙えます';
+  if (total >= 8)  return '📚 あと一歩！模範解答と見比べて改善点を確認しましょう';
+  if (total >= 5)  return '🔰 基礎を固めましょう。接続語と言い換えを意識して';
+  return '💪 まずは模範解答の構造をしっかり分析しましょう';
+}
+
+function submitAnswer() {
+  const userText = document.getElementById('answer-input').value.trim();
+  if (userText.length < 10) { alert('解答を入力してください。'); return; }
+  answered = true;
+  const q = questions[currentIndex];
+  const result = scoreAnswer(userText, q);
+  document.getElementById('total-pts').textContent = result.total;
+  document.getElementById('score-msg').textContent = getScoreMsg(result.total);
+  ['content','structure','vocab','grammar'].forEach(key => {
+    document.getElementById('pt-' + key).textContent = result[key];
+    document.getElementById('sc-' + key).className = 'score-item ' + getScoreClass(result[key]);
+  });
+  const ul = document.getElementById('feedback-list');
+  ul.innerHTML = '';
+  result.feedback.forEach(f => { const li = document.createElement('li'); li.textContent = f; ul.appendChild(li); });
+  document.getElementById('model-answer-text').textContent = q.modelAnswer;
+  document.getElementById('model-word-count').textContent = '語数：' + q.modelWords + '語';
+  const exDiv = document.getElementById('explanation-content');
+  exDiv.innerHTML = '';
+  q.keyPoints.forEach(kp => { const div = document.createElement('div'); div.className = 'key-point'; div.innerHTML = '<span class="icon">' + kp.icon + '</span><span>' + kp.text + '</span>'; exDiv.appendChild(div); });
+  document.getElementById('feedback-section').style.display = 'block';
+  document.getElementById('submit-btn').disabled = true;
+  setTimeout(() => { document.getElementById('feedback-section').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+}
+
+function retryQuestion() {
+  answered = false;
+  document.getElementById('answer-input').value = '';
+  updateWordCount();
+  document.getElementById('feedback-section').style.display = 'none';
+  document.getElementById('submit-btn').disabled = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextQuestion() { currentIndex = (currentIndex + 1) % questions.length; loadQuestion(); }
+loadQuestion();
+</script>
+</body>
+</html>
