@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英検1級 要約対策アプリ</title>
+<style>
+  :root{--navy:#1F3864;--blue:#2E74B5;--light-blue:#DEEAF1;--accent:#E67E22;--green:#27AE60;--red:#E74C3C;--gray:#7F8C8D;--bg:#F4F6F9;--white:#FFFFFF;--border:#BDC3C7;--purple:#6B219E;--dpurple:#4A0E8F;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI','Helvetica Neue',Arial,'Noto Sans JP',sans-serif;background:var(--bg);color:#2C3E50;min-height:100vh;}
+  header{background:linear-gradient(135deg,#2c0657 0%,#6B219E 100%);color:white;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+  header h1{font-size:1.3rem;font-weight:700;letter-spacing:0.05em;}
+  header span{font-size:0.85rem;opacity:0.8;}
+  .container{max-width:900px;margin:0 auto;padding:24px 16px;}
+  .grade-nav{display:flex;gap:10px;margin-bottom:24px;background:white;padding:12px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.06);}
+  .grade-link{flex:1;padding:12px;border:2px solid var(--border);border-radius:8px;background:white;font-size:0.95rem;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;color:var(--gray);transition:all 0.2s;display:block;}
+  .grade-link:hover{border-color:var(--purple);color:var(--purple);}
+  .grade-link.active{background:var(--purple);border-color:var(--purple);color:white;box-shadow:0 3px 8px rgba(107,33,158,0.35);}
+  .grade-link .badge{display:block;font-size:0.7rem;font-weight:400;margin-top:2px;opacity:0.75;}
+  .card{background:white;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:20px;}
+  .card-title{font-size:0.8rem;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+  .card-title::before{content:'';display:inline-block;width:4px;height:16px;background:var(--purple);border-radius:2px;}
+  .info-row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .info-chip{background:#F3E5F5;color:#4A148C;font-size:0.8rem;font-weight:600;padding:4px 12px;border-radius:20px;}
+  .info-chip.topic{background:#FEF9E7;color:#7D6608;}
+  #passage-text{font-size:0.98rem;line-height:1.9;color:#2C3E50;white-space:pre-line;}
+  textarea{width:100%;min-height:160px;padding:14px;border:2px solid var(--border);border-radius:8px;font-size:1rem;line-height:1.7;resize:vertical;font-family:inherit;transition:border-color 0.2s;}
+  textarea:focus{outline:none;border-color:var(--purple);}
+  .word-bar{margin-top:10px;}
+  .word-status{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .word-count{font-size:0.95rem;font-weight:600;}
+  .word-count.ok{color:var(--green);}
+  .word-count.low{color:var(--accent);}
+  .word-count.over{color:var(--red);}
+  .progress-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .progress-fill{height:100%;border-radius:3px;transition:width 0.3s,background 0.3s;}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+  .btn{padding:12px 24px;border:none;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+  .btn-primary{background:var(--purple);color:white;flex:1;min-width:120px;}
+  .btn-primary:hover{background:var(--dpurple);}
+  .btn-primary:disabled{background:var(--border);cursor:not-allowed;}
+  .btn-secondary{background:#F3E5F5;color:#4A148C;}
+  .btn-secondary:hover{background:#e1bee7;}
+  #feedback-section{display:none;}
+  .score-board{background:linear-gradient(135deg,#2c0657 0%,#6B219E 100%);border-radius:12px;padding:20px;color:white;text-align:center;margin-bottom:20px;}
+  .total-score{font-size:3rem;font-weight:800;line-height:1;}
+  .total-score span{font-size:1.2rem;font-weight:400;opacity:0.8;}
+  .score-msg{font-size:0.95rem;margin-top:8px;opacity:0.9;}
+  .score-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;}
+  .score-item{background:white;border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center;border-left:4px solid var(--border);}
+  .score-item.great{border-color:var(--green);}
+  .score-item.good{border-color:var(--blue);}
+  .score-item.fair{border-color:var(--accent);}
+  .score-item.poor{border-color:var(--red);}
+  .score-label{font-size:0.9rem;font-weight:600;color:#2C3E50;}
+  .score-pts{font-size:1.4rem;font-weight:800;color:var(--navy);}
+  .score-pts span{font-size:0.75rem;color:var(--gray);}
+  .feedback-list{list-style:none;}
+  .feedback-list li{padding:10px 14px;border-bottom:1px solid #EEF0F3;font-size:0.9rem;line-height:1.6;}
+  .feedback-list li:last-child{border-bottom:none;}
+  .model-answer-box{background:#F0FAF4;border:2px solid #A9DFBF;border-radius:10px;padding:16px;}
+  .model-answer-box p{font-size:1rem;line-height:1.8;color:#1E8449;}
+  .model-word-badge{display:inline-block;background:var(--green);color:white;font-size:0.8rem;font-weight:600;padding:2px 10px;border-radius:20px;margin-top:8px;}
+  .key-point{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #EEF0F3;font-size:0.9rem;line-height:1.6;}
+  .key-point:last-child{border-bottom:none;}
+  .key-point .icon{font-size:1.1rem;flex-shrink:0;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎯 英検1級 要約対策アプリ</h1>
+  <span id="q-counter">問題 1 / 10</span>
+</header>
+<div class="container">
+  <nav class="grade-nav">
+    <a class="grade-link" href="2kyu.html">2級<span class="badge">45〜55語</span></a>
+    <a class="grade-link" href="pre1kyu.html">準1級<span class="badge">60〜70語</span></a>
+    <a class="grade-link active" href="1kyu.html">1級<span class="badge">90〜110語</span></a>
+  </nav>
+  <div class="card">
+    <div class="card-title">📄 英文パッセージ</div>
+    <div class="info-row">
+      <span class="info-chip topic" id="topic-chip">トピック</span>
+      <span class="info-chip" id="wordcount-chip">語数</span>
+      <span class="info-chip">要約目標：90〜110語</span>
+    </div>
+    <div id="passage-text"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">✏️ あなたの要約</div>
+    <textarea id="answer-input" placeholder="ここに英語で要約を書いてください（90〜110語）" oninput="updateWordCount()"></textarea>
+    <div class="word-bar">
+      <div class="word-status">
+        <span class="word-count" id="wc-label">0語</span>
+        <span style="font-size:0.8rem;color:var(--gray)">目標：90〜110語</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="submit-btn" onclick="submitAnswer()">採点する</button>
+      <button class="btn btn-secondary" onclick="resetAnswer()">クリア</button>
+    </div>
+  </div>
+  <div id="feedback-section">
+    <div class="score-board">
+      <div class="total-score"><span id="total-pts">0</span><span> / 16点</span></div>
+      <div class="score-msg" id="score-msg"></div>
+    </div>
+    <div class="score-grid">
+      <div class="score-item" id="sc-content"><span class="score-label">📝 内容</span><span class="score-pts"><span id="pt-content">0</span><span> / 4</span></span></div>
+      <div class="score-item" id="sc-structure"><span class="score-label">🔗 構成</span><span class="score-pts"><span id="pt-structure">0</span><span> / 4</span></span></div>
+      <div class="score-item" id="sc-vocab"><span class="score-label">📚 語彙</span><span class="score-pts"><span id="pt-vocab">0</span><span> / 4</span></span></div>
+      <div class="score-item" id="sc-grammar"><span class="score-label">✅ 文法</span><span class="score-pts"><span id="pt-grammar">0</span><span> / 4</span></span></div>
+    </div>
+    <div class="card"><div class="card-title">💬 フィードバック</div><ul class="feedback-list" id="feedback-list"></ul></div>
+    <div class="card"><div class="card-title">✅ 模範解答</div><div class="model-answer-box"><p id="model-answer-text"></p><span class="model-word-badge" id="model-word-count"></span></div></div>
+    <div class="card"><div class="card-title">📌 解説・ポイント</div><div id="explanation-content"></div></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="nextQuestion()">次の問題へ →</button>
+      <button class="btn btn-secondary" onclick="retryQuestion()">もう一度挑戦</button>
+    </div>
+  </div>
+</div>
+<script>
+const questions = [
+  {
+    topic:"認知バイアスと意思決定",wordCount:172,minWords:90,maxWords:110,
+    passage:`Human decision-making is frequently influenced by cognitive biases — systematic patterns of thinking that deviate from rational judgment. One well-documented example is confirmation bias, whereby individuals tend to seek out and accept information that supports their existing beliefs while dismissing contradictory evidence. This tendency can reinforce misconceptions and hinder objective analysis, particularly in professional and political contexts.
+
+Another pervasive bias is the sunk cost fallacy, the inclination to continue investing resources in a failing endeavor simply because significant effort or money has already been committed. Unlike rational actors, who evaluate decisions based solely on future outcomes, individuals affected by this bias allow past investments to distort their judgment, often leading to further losses.
+
+Psychologists argue that awareness alone is insufficient to overcome these biases. Instead, they advocate structured decision-making frameworks, such as pre-mortem analysis and deliberate devil's advocacy, which compel individuals to actively consider alternative perspectives. Such interventions, when systematically applied, have demonstrated measurable improvements in judgment accuracy across various domains.`,
+    modelAnswer:"Human decision-making is often distorted by cognitive biases. Confirmation bias leads people to favor information that aligns with their pre-existing beliefs and reject contradictory evidence, thereby undermining objective reasoning in both professional and political settings. Similarly, the sunk cost fallacy causes individuals to persist with failing ventures because of prior investment, ignoring the rational principle of evaluating only future outcomes. Since mere awareness of these biases is considered insufficient to counteract them, psychologists recommend implementing structured frameworks — such as pre-mortem analysis and devil's advocacy — to actively promote consideration of alternative viewpoints, ultimately enhancing the accuracy of human judgment.",
+    modelWords:100,
+    keyPoints:[
+      {icon:"📌",text:"3段落構造：バイアス①確証バイアス → バイアス②サンクコスト → 解決策（構造化フレームワーク）"},
+      {icon:"📌",text:"「Similarly」で並列構造を示し、2つのバイアスを同格に扱う"},
+      {icon:"⚠️",text:"専門用語（confirmation bias・sunk cost fallacy）は言い換え不要だが、必ず定義を自分の言葉で補う"},
+      {icon:"✅",text:"「Since mere awareness...is insufficient」で第3段落への転換を論理的に示す"},
+      {icon:"⏱️",text:"時間配分：読解10分・構成メモ5分・記述13分・見直し2分"}
+    ]
+  },
+  {
+    topic:"生物多様性と経済",wordCount:168,minWords:90,maxWords:110,
+    passage:`Biodiversity loss has accelerated at an unprecedented rate in recent decades, driven primarily by habitat destruction, climate change, and the overexploitation of natural resources. While the ecological consequences are well-documented, economists and policymakers are increasingly drawing attention to the profound economic implications of this crisis. Natural ecosystems provide a vast array of services — from water purification and carbon sequestration to pollination and flood regulation — that underpin global economic activity worth trillions of dollars annually.
+
+The concept of natural capital valuation seeks to quantify these ecosystem services in monetary terms, making their economic significance visible to decision-makers who might otherwise overlook them. Proponents argue that assigning financial values to nature can incentivize conservation by integrating it into cost-benefit analyses and corporate accounting practices. Critics, however, warn that reducing biodiversity to economic metrics risks commodifying nature, potentially prioritizing only those species and ecosystems deemed financially valuable while neglecting others.
+
+Bridging this divide requires a comprehensive policy framework that incorporates both economic valuation and intrinsic ecological values, ensuring that conservation decisions reflect the full complexity of humanity's relationship with the natural world.`,
+    modelAnswer:"Biodiversity is declining rapidly, and while the ecological damage is well recognized, there is growing awareness of its severe economic consequences. Natural ecosystems provide critical services — including water purification, carbon absorption, and pollination — that are estimated to be worth trillions of dollars. Natural capital valuation attempts to make these services economically visible, which proponents argue could promote conservation through financial incentives. However, critics caution that monetizing nature may lead to neglecting species and ecosystems without obvious financial value. Resolving this tension requires policy frameworks that balance economic valuation with a recognition of nature's intrinsic worth.",
+    modelWords:105,
+    keyPoints:[
+      {icon:"📌",text:"3段落：問題（生物多様性損失の経済的影響）→ 解決策の提案（自然資本評価）→ 批判と統合"},
+      {icon:"📌",text:"「from...to...」の列挙は「including...」に圧縮、末尾に「estimated to be worth」で価値を強調"},
+      {icon:"⚠️",text:"「commodifying nature」「intrinsic ecological values」などの哲学的概念は言い換えより定義で補足する"},
+      {icon:"✅",text:"「Resolving this tension requires」で第3段落の結論を1文で集約するテクニック"},
+      {icon:"⏱️",text:"1級は抽象度が高いため「段落ごとに1文メモ」してから記述を開始すること"}
+    ]
+  },
+  {
+    topic:"デジタル通貨と金融政策",wordCount:175,minWords:90,maxWords:110,
+    passage:`The rapid emergence of central bank digital currencies, or CBDCs, represents a fundamental transformation in the architecture of the global monetary system. Unlike decentralized cryptocurrencies such as Bitcoin, CBDCs are issued and regulated by sovereign governments, combining the technological efficiency of digital transactions with the stability of state-backed financial instruments. More than one hundred countries are currently exploring or piloting CBDC programs, motivated by goals ranging from enhancing financial inclusion to strengthening monetary policy transmission.
+
+Proponents contend that CBDCs could extend banking services to unbanked populations in developing nations, reduce the costs of cross-border transactions, and provide central banks with more precise tools for implementing monetary policy, particularly during economic crises. Furthermore, the programmability of digital currencies could enable governments to direct stimulus payments more efficiently to targeted beneficiaries.
+
+Nevertheless, significant concerns persist regarding privacy, surveillance, and financial stability. Critics argue that government-issued digital currencies could enable unprecedented state surveillance of citizens' financial activities. There are also fears that a rapid migration to CBDCs could destabilize existing commercial banking systems, as individuals might shift deposits directly to central bank accounts during periods of economic uncertainty.`,
+    modelAnswer:"Central bank digital currencies are gaining global momentum, with over one hundred countries exploring their implementation. Unlike decentralized cryptocurrencies, CBDCs are state-issued, blending technological efficiency with monetary stability. Supporters argue that CBDCs could improve financial inclusion, lower transaction costs, and give central banks more effective policy tools, with programmability allowing targeted stimulus distribution. Nevertheless, serious concerns persist: critics warn that CBDCs could enable extensive government surveillance of financial behavior, and that rapid adoption might destabilize commercial banking by encouraging depositors to shift funds to central bank accounts.",
+    modelWords:95,
+    keyPoints:[
+      {icon:"📌",text:"3段落：CBDCの概要 → 支持派の主張（金融包摂・政策ツール）→ 反対派の懸念（監視・金融不安定）"},
+      {icon:"📌",text:"「with programmability allowing」で付帯状況の分詞構文を活用して語数を圧縮"},
+      {icon:"⚠️",text:"「enabling unprecedented state surveillance」→「enable extensive government surveillance」で言い換え"},
+      {icon:"✅",text:"コロン「:」の後に批判内容を列挙する構造で情報を整理して示す"},
+      {icon:"⏱️",text:"経済・金融トピックは専門用語が多い。「state-issued」「monetary stability」などは確実に押さえる"}
+    ]
+  },
+  {
+    topic:"民主主義の危機",wordCount:170,minWords:90,maxWords:110,
+    passage:`Liberal democracy, long considered the dominant political system of the modern era, is facing unprecedented challenges in many parts of the world. The rise of populist movements and authoritarian leaders who exploit democratic processes to consolidate power has prompted widespread concern among political scientists. Elections are increasingly contested, trust in institutions is eroding, and media ecosystems are fragmenting along partisan lines.
+
+Political theorists identify several structural factors contributing to democratic backsliding. Economic inequality has generated grievances that established parties have failed to address, creating fertile ground for demagogues who promise simple solutions to complex problems. The digital revolution, while initially celebrated as a democratizing force, has facilitated the spread of disinformation and enabled targeted political manipulation at an unprecedented scale.
+
+Defenders of democracy argue that its resilience lies in civil society, independent judiciaries, and free press. Historical evidence suggests that democracies can recover from periods of stress when robust institutions and an engaged citizenry resist authoritarian encroachment. The critical challenge is therefore to strengthen these protective mechanisms before erosion becomes irreversible.`,
+    modelAnswer:"Liberal democracy faces mounting pressures globally, as populist and authoritarian movements exploit democratic processes to consolidate power, eroding institutional trust and fragmenting media ecosystems. Structural factors driving this backsliding include economic inequality, which established parties have failed to address, and digital disinformation that enables unprecedented political manipulation. Nevertheless, defenders argue that democratic resilience lies in strong civil society, independent judiciaries, and a free press — institutions that historical evidence suggests can withstand authoritarian pressure when actively supported by an engaged citizenry.",
+    modelWords:85,
+    keyPoints:[
+      {icon:"📌",text:"民主主義の危機の現状 → 要因（格差・デジタル情報操作）→ 回復力（市民社会・司法・報道）"},
+      {icon:"📌",text:"「which established parties have failed to address」で関係節を挿入して原因を具体化"},
+      {icon:"⚠️",text:"「backsliding」は重要な政治用語。「democratic erosion」「democratic decline」と言い換え可"},
+      {icon:"✅",text:"「—」（ダッシュ）で「institutions that...」という関係節を後置して情報を整理"},
+      {icon:"⏱️",text:"抽象的な政治概念は「具体的なプロセス」として言い換えることで内容点を稼ぐ"}
+    ]
+  },
+  {
+    topic:"AIと倫理的課題",wordCount:173,minWords:90,maxWords:110,
+    passage:`Artificial intelligence systems are increasingly being deployed across high-stakes domains, including criminal justice, healthcare, and financial lending. While these applications promise efficiency gains and objective decision-making, they raise profound ethical concerns. Research has consistently demonstrated that AI systems can perpetuate and even amplify existing social biases, as algorithms trained on historical data may encode the prejudices embedded in that data.
+
+The concept of algorithmic accountability has emerged as a central concern in AI governance. Transparency advocates argue that decisions made by AI systems should be explainable and subject to meaningful human oversight, particularly in contexts where automated decisions can determine access to vital services or freedom. However, the technical complexity of advanced machine learning models, often described as "black boxes," makes genuine transparency difficult to achieve in practice.
+
+Policymakers face the challenge of fostering AI innovation while preventing harm. Various regulatory frameworks have been proposed globally, ranging from sector-specific guidelines to comprehensive AI legislation. Critics of heavy-handed regulation warn that excessive restrictions could impede technological progress, while proponents of strict oversight emphasize that the costs of unregulated AI — including systemic discrimination and erosion of civil liberties — are unacceptably high.`,
+    modelAnswer:"AI is increasingly deployed in high-stakes domains such as criminal justice and healthcare, raising ethical concerns because algorithms trained on historical data can perpetuate and amplify existing social biases. Algorithmic accountability has thus become a governance priority: transparency advocates argue that AI decisions must be explainable and subject to human oversight, though the complexity of advanced models makes this difficult. Policymakers face the challenge of balancing innovation with harm prevention, as proposed frameworks range from sector-specific guidelines to comprehensive legislation, with critics warning against over-regulation and proponents stressing the dangers of unregulated systemic discrimination.",
+    modelWords:100,
+    keyPoints:[
+      {icon:"📌",text:"AIの高リスク領域での展開 → 偏見の問題（アルゴリズム的説明責任）→ 規制の課題"},
+      {icon:"📌",text:"「algorithms trained on historical data can perpetuate」で因果を1文に圧縮"},
+      {icon:"⚠️",text:"「black boxes」は比喩的表現。「complex and opaque models」などと言い換えも可"},
+      {icon:"✅",text:"「as proposed frameworks range from A to B」でrangeを使った幅の表現を活用"},
+      {icon:"⏱️",text:"「systemic discrimination」「civil liberties」は1級頻出。確実に使いこなせるようにする"}
+    ]
+  },
+  {
+    topic:"人口減少と経済",wordCount:171,minWords:90,maxWords:110,
+    passage:`Demographic decline — characterized by falling birth rates and an aging population — poses one of the most complex long-term challenges facing advanced economies. As the working-age population shrinks relative to retirees, the fiscal sustainability of pension systems, healthcare infrastructure, and social security programs comes under severe strain. Countries such as Japan, South Korea, and several European nations are already confronting the economic consequences of these shifts.
+
+Economists have proposed various strategies to mitigate the effects of population decline. Immigration is frequently cited as a relatively rapid means of augmenting the labor force and diversifying the tax base. Advances in automation and artificial intelligence may partially compensate for labor shortages by increasing per-worker productivity. Additionally, policies aimed at raising birth rates, such as subsidized childcare and parental leave, have shown modest success in some countries, though the relationship between financial incentives and fertility decisions remains complex.
+
+Critics warn, however, that these solutions are insufficient in isolation. Immigration may face political resistance, automation can exacerbate inequality if its gains are not broadly shared, and pronatalist policies have rarely achieved dramatic demographic reversals. Addressing population decline ultimately requires a comprehensive and adaptive policy response that acknowledges its multidimensional nature.`,
+    modelAnswer:"Demographic decline — falling birth rates and aging populations — threatens the fiscal sustainability of pension, healthcare, and social security systems across advanced economies. Proposed responses include immigration to expand the labor force, automation to offset labor shortages, and pronatalist policies such as subsidized childcare, though each has demonstrated limited effectiveness in isolation. Critics warn that immigration faces political resistance, automation risks deepening inequality without broad benefit-sharing, and fertility incentives rarely produce dramatic reversals, necessitating a comprehensive and adaptive policy approach.",
+    modelWords:90,
+    keyPoints:[
+      {icon:"📌",text:"少子高齢化の財政的影響 → 3つの対策（移民・自動化・少子化対策）→ 各対策の限界"},
+      {icon:"📌",text:"「—」で定義を挿入してから影響を述べる構造（1文目のダッシュ活用）"},
+      {icon:"⚠️",text:"「pronatalist policies」は重要語。「policies to raise birth rates」と言い換えても可"},
+      {icon:"✅",text:"「necessitating a comprehensive and adaptive policy approach」で分詞構文を使って締める"},
+      {icon:"⏱️",text:"複数の解決策を列挙する際は「include A, B, and C, though...」の構造が語数効率が高い"}
+    ]
+  },
+  {
+    topic:"量子コンピューティングの可能性",wordCount:168,minWords:90,maxWords:110,
+    passage:`Quantum computing represents a paradigm shift in computational power, leveraging the principles of quantum mechanics to process information in fundamentally different ways from classical computers. While conventional computers use binary bits that exist as either zero or one, quantum computers employ quantum bits, or qubits, which can exist in multiple states simultaneously through a phenomenon known as superposition. Combined with quantum entanglement, this enables quantum systems to solve certain types of complex problems at speeds that would be unattainable for even the most powerful conventional supercomputers.
+
+The potential applications of quantum computing span numerous fields. In pharmaceuticals, quantum simulation could accelerate drug discovery by modeling molecular interactions with unprecedented accuracy. In cryptography, quantum computers threaten to render current encryption methods obsolete, as they could theoretically break widely used security protocols in a fraction of the time currently required. Financial institutions are exploring quantum algorithms to optimize portfolio management and risk assessment.
+
+However, significant technical barriers remain. Building stable qubits that maintain coherence long enough to perform useful calculations is an enormous engineering challenge. Experts estimate that fault-tolerant quantum computers capable of practical applications may still be decades away, though incremental advances continue to narrow the timeline.`,
+    modelAnswer:"Quantum computing harnesses quantum mechanical principles — particularly superposition and entanglement — to solve complex problems at speeds impossible for classical computers. Its potential applications are transformative: in pharmaceuticals, it could revolutionize drug discovery through molecular simulation; in cryptography, it threatens to break current encryption methods, necessitating new security protocols; and in finance, it offers sophisticated optimization tools. However, significant engineering barriers remain, as maintaining qubit coherence is extremely challenging, leading experts to estimate that fully fault-tolerant quantum computers may still be decades away.",
+    modelWords:93,
+    keyPoints:[
+      {icon:"📌",text:"量子コンピュータの原理（重ね合わせ・量子もつれ）→ 応用分野 → 技術的障壁"},
+      {icon:"📌",text:"「particularly superposition and entanglement」で重要概念を後置で補足するテクニック"},
+      {icon:"⚠️",text:"「render current encryption methods obsolete」→「threaten to break current encryption methods」で言い換え"},
+      {icon:"✅",text:"セミコロン「;」を使って複数の応用分野を並列する構造で語数を効率化"},
+      {icon:"⏱️",text:"科学技術トピックは専門用語（qubit・coherence・fault-tolerant）を正確に使うと語彙点が高い"}
+    ]
+  },
+  {
+    topic:"グローバルサプライチェーンの脆弱性",wordCount:169,minWords:90,maxWords:110,
+    passage:`The COVID-19 pandemic exposed the fragility of globally integrated supply chains in ways that policymakers and business leaders had not fully anticipated. Decades of cost-driven optimization had produced highly efficient but deeply vulnerable networks, dependent on specialized suppliers concentrated in a small number of countries. When pandemic-related disruptions cascaded through these networks, shortages of critical goods — from semiconductors to medical equipment — revealed the hidden risks of extreme specialization and geographic concentration.
+
+In response, governments and corporations began reassessing supply chain strategies. Reshoring — relocating production facilities back to domestic markets — gained significant political traction in several countries, particularly for strategically important industries such as semiconductors, pharmaceuticals, and clean energy technology. Diversification strategies, involving the cultivation of multiple suppliers across different regions, have also been widely adopted as a hedge against future disruptions.
+
+Critics of reshoring, however, point out that domestically produced goods are generally more expensive, potentially raising consumer prices and reducing competitiveness. Furthermore, complete independence from global supply networks may be neither practical nor desirable, given the efficiency gains that specialization provides. The emerging consensus favors a balanced approach: maintaining global trade while building strategic reserves and diversifying critical supply chains.`,
+    modelAnswer:"The COVID-19 pandemic exposed the fragility of cost-optimized global supply chains, as concentrated, specialized networks suffered cascading shortages of semiconductors and medical equipment. In response, reshoring production — particularly in strategically vital sectors — gained political momentum, alongside diversification across multiple regional suppliers. Critics, however, warn that reshoring raises consumer prices and undermines competitiveness, making complete supply chain independence impractical. The emerging consensus advocates a balanced approach: preserving global trade efficiencies while strategically diversifying and stockpiling critical goods.",
+    modelWords:88,
+    keyPoints:[
+      {icon:"📌",text:"パンデミックによるサプライチェーンの脆弱性露呈 → 対応（リショアリング・分散化）→ 批判と均衡論"},
+      {icon:"📌",text:"「cascading shortages」は重要表現。「cascading disruptions」「ripple effects」と言い換えも可"},
+      {icon:"⚠️",text:"「reshoring」の定義を括弧で後置する方法と、定義せずに文脈から伝える方法の使い分けを練習する"},
+      {icon:"✅",text:"「preserving A while B」で「AとBの両立」を表す重要構文"},
+      {icon:"⏱️",text:"経済・ビジネストピックでは「strategic reserves」「competitive advantage」などを積極的に活用"}
+    ]
+  },
+  {
+    topic:"脳科学と自由意志",wordCount:166,minWords:90,maxWords:110,
+    passage:`The question of whether humans possess genuine free will has gained renewed urgency in light of advances in neuroscience. Landmark experiments, most notably those conducted by Benjamin Libet in the 1980s, suggested that neural activity associated with voluntary movements begins several hundred milliseconds before subjects become consciously aware of their intention to act. This finding has been interpreted by some as evidence that conscious decisions are, in fact, post-hoc rationalizations of processes already determined by unconscious neural mechanisms.
+
+Philosophers and scientists have responded to this challenge in diverse ways. Compatibilists argue that free will and determinism are not mutually exclusive — that meaningful freedom consists not in the ability to have acted otherwise under identical conditions, but in acting in accordance with one's own values and reasoning processes without external coercion. This conception of free will is considered sufficient to ground moral responsibility and social institutions such as law.
+
+Neuroscientists increasingly caution against overstating the implications of Libet-style experiments, noting methodological limitations and the complex, distributed nature of decision-making processes in the brain. The debate illustrates a broader tension between reductive scientific explanations and the phenomenology of human experience, suggesting that neuroscience alone may be insufficient to settle questions traditionally addressed by philosophy.`,
+    modelAnswer:"Neuroscientific research, particularly Libet's experiments showing unconscious neural activity preceding conscious intention, has reignited debate about whether free will is genuine. Some interpret this as evidence that conscious choices are merely post-hoc rationalizations of predetermined neural processes. Compatibilists counter that free will is compatible with determinism, defining it as acting according to one's values without coercion — a conception sufficient to underpin moral responsibility. Neuroscientists also caution against overinterpreting Libet's findings due to methodological limitations, suggesting that neuroscience alone cannot resolve questions that have traditionally fallen within the domain of philosophy.",
+    modelWords:97,
+    keyPoints:[
+      {icon:"📌",text:"リベットの実験 → 自由意志否定派の解釈 → 両立論者の反論 → 神経科学者の留保"},
+      {icon:"📌",text:"「reignited debate about whether...」で「〜についての議論を再燃させた」という表現"},
+      {icon:"⚠️",text:"「compatibilism」「determinism」は哲学専門語。定義を括弧か関係節で補足すること"},
+      {icon:"✅",text:"「—」（ダッシュ）で定義を挿入した後、「a conception sufficient to...」で評価を加える"},
+      {icon:"⏱️",text:"哲学・認知科学トピックは最難度。段落ごとの論点（主張・反論・留保）を先にメモしてから書く"}
+    ]
+  },
+  {
+    topic:"核融合エネルギーの展望",wordCount:167,minWords:90,maxWords:110,
+    passage:`Nuclear fusion — the process that powers stars by fusing hydrogen isotopes to release enormous amounts of energy — has long been heralded as the potential solution to humanity's energy challenges. Unlike nuclear fission, which splits heavy atoms and generates long-lived radioactive waste, fusion produces minimal radioactive byproducts and uses isotopes of hydrogen as fuel, a resource that is effectively inexhaustible. These properties have made fusion an attractive, if elusive, energy prospect.
+
+Recent years have seen significant milestones in fusion research. In late 2022, scientists at the National Ignition Facility in the United States achieved a historic breakthrough, producing more energy from a fusion reaction than was delivered by the lasers used to initiate it. Private companies have also entered the field in force, with substantial investment flowing into ventures aiming to commercialize fusion within the next decade.
+
+Despite this momentum, formidable challenges remain before fusion becomes a viable commercial energy source. Achieving sustained, high-performance plasma conditions consistently, as well as developing materials capable of withstanding the extreme environments inside fusion reactors, represents engineering challenges of extraordinary complexity. Skeptics argue that commercial fusion has perpetually been "thirty years away," and that the remaining technical hurdles should temper optimism about near-term deployment.`,
+    modelAnswer:"Nuclear fusion offers a potentially transformative energy source, as it mimics stellar processes to generate vast energy with minimal radioactive waste using inexhaustible hydrogen fuel. Recent breakthroughs — most notably the 2022 ignition milestone at the National Ignition Facility, alongside surging private investment — have revitalized optimism. Nevertheless, formidable engineering challenges remain: sustaining high-performance plasma and developing reactor-resistant materials are extraordinarily complex, and skeptics caution that the persistent prediction of fusion being 'thirty years away' should temper enthusiasm about rapid commercialization.",
+    modelWords:92,
+    keyPoints:[
+      {icon:"📌",text:"核融合の原理・メリット → 最近の技術的進展 → 残る課題と懐疑的見方"},
+      {icon:"📌",text:"「most notably the 2022 ignition milestone」で具体的な事実を後置挿入して信頼性を高める"},
+      {icon:"⚠️",text:"「perpetually been 'thirty years away'」は有名な引用。引用符を使って原文の表現を活かす"},
+      {icon:"✅",text:"「:」の後に課題を列挙する構造で情報を整理して示す"},
+      {icon:"⏱️",text:"科学トピックでは数字・固有名詞を積極的に使うと内容点が高くなる"}
+    ]
+  }
+];
+
+let currentIndex = 0;
+let answered = false;
+
+function loadQuestion() {
+  const q = questions[currentIndex];
+  answered = false;
+  document.getElementById('topic-chip').textContent = q.topic;
+  document.getElementById('wordcount-chip').textContent = '元の文：' + q.wordCount + '語';
+  document.getElementById('passage-text').textContent = q.passage;
+  document.getElementById('answer-input').value = '';
+  document.getElementById('feedback-section').style.display = 'none';
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('q-counter').textContent = '問題 ' + (currentIndex + 1) + ' / ' + questions.length;
+  updateWordCount();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function countWords(text) {
+  return text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+}
+
+function updateWordCount() {
+  const q = questions[currentIndex];
+  const text = document.getElementById('answer-input').value;
+  const count = countWords(text);
+  const label = document.getElementById('wc-label');
+  const fill = document.getElementById('progress-fill');
+  label.textContent = count + '語';
+  label.className = 'word-count ' + (count < q.minWords ? 'low' : count > q.maxWords ? 'over' : 'ok');
+  const pct = Math.min(count / q.maxWords * 100, 110);
+  fill.style.width = pct + '%';
+  fill.style.background = count < q.minWords ? 'var(--accent)' : count > q.maxWords ? 'var(--red)' : 'var(--green)';
+}
+
+function resetAnswer() { document.getElementById('answer-input').value = ''; updateWordCount(); }
+
+function scoreAnswer(userText, q) {
+  const user = userText.toLowerCase();
+  const model = q.modelAnswer.toLowerCase();
+  const userWords = user.split(/\s+/);
+  const modelKeywords = model.split(/\s+/).filter(w => w.length > 5);
+  const count = countWords(userText);
+  let content = 0, structure = 0, vocab = 0, grammar = 0;
+  const feedback = [];
+  const hits = modelKeywords.filter(w => user.includes(w.replace(/[^a-z]/g,''))).length;
+  const ratio = hits / Math.max(modelKeywords.length, 1);
+  content = ratio >= 0.5 ? 4 : ratio >= 0.35 ? 3 : ratio >= 0.2 ? 2 : 1;
+  if (content < 3) feedback.push('📝 内容：模範解答のキーワードをより多く含めましょう。3段落の主要論点が全て入っていますか？');
+  const connectives = ['however','therefore','thus','moreover','furthermore','nevertheless','consequently','in addition','although','while','whereas','despite','yet','similarly','conversely','notwithstanding'];
+  const connCount = connectives.filter(c => user.includes(c)).length;
+  const sentences = userText.split(/[.!?]+/).filter(s => s.trim().length > 3).length;
+  structure = Math.min(4, connCount * 1 + (connCount >= 2 ? 1 : 0) + (sentences >= 3 ? 1 : 0) + (sentences <= 6 ? 1 : 0));
+  if (connCount < 2) feedback.push('🔗 構成：nevertheless / furthermore / similarly などの接続語を2つ以上使って論理的な流れを示しましょう。');
+  const advWords = ['insufficient','excessive','significant','crucial','essential','promote','enhance','reduce','contribute','address','emphasize','demonstrate','indicate','establish','maintain','advocate','persist','undermine','facilitate','exacerbate','unprecedented','comprehensive','fundamental','predominantly','necessitate','perpetuate'];
+  const advCount = advWords.filter(w => user.includes(w)).length;
+  const uniqueCount = new Set(userWords.map(w => w.replace(/[^a-z]/g,''))).size;
+  vocab = Math.min(4, Math.floor(advCount * 1.2) + (uniqueCount > 50 ? 2 : uniqueCount > 38 ? 1 : 0));
+  if (vocab < 2) feedback.push('📚 語彙：unprecedented / comprehensive / necessitate などの学術語彙を積極的に使いましょう。');
+  const inRange = count >= q.minWords && count <= q.maxWords;
+  const avgLen = userWords.length / Math.max(sentences, 1);
+  grammar = (inRange ? 2 : 1) + (avgLen >= 12 && avgLen <= 30 ? 1 : 0) + (userText.includes(',') || userText.includes(';') ? 1 : 0);
+  if (!inRange) feedback.push('✅ 語数：' + count + '語です。目標の' + q.minWords + '〜' + q.maxWords + '語に調整しましょう。');
+  if (feedback.length === 0) feedback.push('🏆 素晴らしい要約です！内容・構成・語彙・語数すべてバランスが取れています。');
+  return { content, structure, vocab, grammar, total: content + structure + vocab + grammar, feedback };
+}
+
+function getScoreClass(pt) { return pt >= 4 ? 'great' : pt >= 3 ? 'good' : pt >= 2 ? 'fair' : 'poor'; }
+function getScoreMsg(total) {
+  if (total >= 14) return '🏆 素晴らしい！英検本番でも十分通用するレベルです';
+  if (total >= 11) return '👍 よくできています！細部を磨けば満点も狙えます';
+  if (total >= 8)  return '📚 あと一歩！模範解答と見比べて改善点を確認しましょう';
+  if (total >= 5)  return '🔰 基礎を固めましょう。接続語と学術語彙を意識して';
+  return '💪 まずは模範解答の構造を段落ごとに分析しましょう';
+}
+
+function submitAnswer() {
+  const userText = document.getElementById('answer-input').value.trim();
+  if (userText.length < 10) { alert('解答を入力してください。'); return; }
+  answered = true;
+  const q = questions[currentIndex];
+  const result = scoreAnswer(userText, q);
+  document.getElementById('total-pts').textContent = result.total;
+  document.getElementById('score-msg').textContent = getScoreMsg(result.total);
+  ['content','structure','vocab','grammar'].forEach(key => {
+    document.getElementById('pt-' + key).textContent = result[key];
+    document.getElementById('sc-' + key).className = 'score-item ' + getScoreClass(result[key]);
+  });
+  const ul = document.getElementById('feedback-list');
+  ul.innerHTML = '';
+  result.feedback.forEach(f => { const li = document.createElement('li'); li.textContent = f; ul.appendChild(li); });
+  document.getElementById('model-answer-text').textContent = q.modelAnswer;
+  document.getElementById('model-word-count').textContent = '語数：' + q.modelWords + '語';
+  const exDiv = document.getElementById('explanation-content');
+  exDiv.innerHTML = '';
+  q.keyPoints.forEach(kp => { const div = document.createElement('div'); div.className = 'key-point'; div.innerHTML = '<span class="icon">' + kp.icon + '</span><span>' + kp.text + '</span>'; exDiv.appendChild(div); });
+  document.getElementById('feedback-section').style.display = 'block';
+  document.getElementById('submit-btn').disabled = true;
+  setTimeout(() => { document.getElementById('feedback-section').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+}
+
+function retryQuestion() {
+  answered = false;
+  document.getElementById('answer-input').value = '';
+  updateWordCount();
+  document.getElementById('feedback-section').style.display = 'none';
+  document.getElementById('submit-btn').disabled = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextQuestion() { currentIndex = (currentIndex + 1) % questions.length; loadQuestion(); }
+loadQuestion();
+</script>
+</body>
+</html>
