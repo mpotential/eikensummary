@@ -62,6 +62,34 @@
 </style>
 </head>
 <body>
+<div id="pw-overlay" style="position:fixed;inset:0;background:#1F3864;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;">
+  <div style="background:white;border-radius:16px;padding:40px 32px;max-width:360px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.4);">
+    <div style="font-size:2.5rem;margin-bottom:12px;">🔐</div>
+    <h2 style="color:#1F3864;font-size:1.2rem;margin-bottom:8px;">英検1級 要約対策アプリ</h2>
+    <p style="color:#666;font-size:0.85rem;margin-bottom:24px;">Noteで購入いただいた方のための合言葉を入力してください。</p>
+    <input id="pw-input" type="password" placeholder="合言葉を入力" style="width:100%;padding:12px 16px;border:2px solid #ddd;border-radius:8px;font-size:1rem;outline:none;text-align:center;" onkeydown="if(event.key==='Enter')checkPw()">
+    <div id="pw-error" style="color:#E74C3C;font-size:0.8rem;margin-top:8px;min-height:20px;"></div>
+    <button onclick="checkPw()" style="margin-top:12px;width:100%;padding:12px;background:#2E74B5;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">入力する</button>
+    <p style="color:#aaa;font-size:0.75rem;margin-top:16px;">合言葉はNoteの購入記事に記載されています。</p>
+  </div>
+</div>
+<script>
+(function(){
+  var k = sessionStorage.getItem('eiken_pw_1kyu');
+  if(k === '1') document.getElementById('pw-overlay').style.display='none';
+})();
+function checkPw(){
+  var v = document.getElementById('pw-input').value.trim();
+  if(v === 'mio1kyu2025'){
+    sessionStorage.setItem('eiken_pw_1kyu','1');
+    document.getElementById('pw-overlay').style.display='none';
+  } else {
+    document.getElementById('pw-error').textContent='合言葉が違います。もう一度確認してください。';
+    document.getElementById('pw-input').value='';
+    document.getElementById('pw-input').focus();
+  }
+}
+</script>
 <header>
   <h1>🎯 英検1級 要約対策アプリ</h1>
   <span id="q-counter">問題 1 / 10</span>
